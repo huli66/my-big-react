@@ -1,0 +1,13 @@
+{
+	"name": "react",
+	"version": "1.0.0",
+	"description": "react 公用方法",
+	"": "rollup 打包原生支持 ESModule，所以使用 module，不需要用 commonjs 的入口 main",
+	"module": "index.ts",
+	"dependencies": {
+		"shared": "workspace:*"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC"
+}
