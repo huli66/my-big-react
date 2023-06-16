@@ -1,6 +1,5 @@
 export type WorkTag =
 	| typeof FunctionComponent
-	| typeof FunctionComponent
 	| typeof HostRoot
 	| typeof HostComponent
 	| typeof HostText;
