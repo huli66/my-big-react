@@ -22,6 +22,7 @@ export class FiberNode {
 
 	alternate: FiberNode | null;
 	flags: Flag;
+	subtreeFlags: Flag;
 
 	updateQueue: unknown;
 
@@ -50,6 +51,7 @@ export class FiberNode {
 		this.alternate = null;
 		// 副作用
 		this.flags = NoFlags;
+		this.subtreeFlags = NoFlags;
 	}
 }
 
