@@ -19,6 +19,7 @@ export const beginWork = (wip: FiberNode) => {
 			}
 			break;
 	}
+	return null;
 };
 
 function updateHostRoot(wip: FiberNode) {
@@ -41,12 +42,16 @@ function updateHostComponent(wip: FiberNode) {
 	return wip.child;
 }
 
+/** 对比子节点的 FiberNode 和 ReactElement 生成子节点的 FiberNode */
 function reconcileChildren(wip: FiberNode, children?: ReactElementType) {
+	// 获取当前节点的 current FiberNode，子节点的 current FiberNode 就是 当前 FiberNode 的 child
 	const current = wip.alternate;
 
+	// 返回的 子节点的 FiberNode 挂载在 wip.child 上，双缓冲交换后就是下次的 curret.child
 	if (current !== null) {
 		wip.child = reconcileChildFibers(wip, current?.child, children);
 	} else {
+		// mount 阶段 current 没有数据
 		wip.child = mountChildFibers(wip, null, children);
 	}
 }

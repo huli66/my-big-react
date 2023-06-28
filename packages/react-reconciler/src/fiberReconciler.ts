@@ -13,6 +13,8 @@ import { scheduleUpdateOnFiber } from './wokrLoop';
 export function createContainer(container: Container) {
 	const hostRootFiber = new FiberNode(HostRoot, {}, null);
 	const root = new FiberRootNode(container, hostRootFiber);
+
+	console.log('createContainer');
 	hostRootFiber.updateQueue = createUpdateQueue();
 
 	return root;
@@ -23,6 +25,8 @@ export function updateContainer(
 	root: FiberRootNode
 ) {
 	const hostRootFiber = root.current;
+
+	console.log('updateContainer');
 	const update = createUpdate<ReactElementType | null>(element);
 	enqueueUpdate(
 		hostRootFiber.updateQueue as UpdateQueue<ReactElementType | null>,

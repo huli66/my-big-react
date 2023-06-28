@@ -25,7 +25,9 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 		return fiber;
 	}
 
+	/** 根据 shouldTrackEffects 和 fiber 的 alternate 判断是否需要加上 Placement 标记 */
 	function placeSingleChild(fiber: FiberNode) {
+		// 刚创建的 fiber 的 alternate 为 null，代表挂载
 		if (shouldTrackEffects && fiber.alternate === null) {
 			fiber.flags |= Placement;
 		}

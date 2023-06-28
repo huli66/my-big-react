@@ -13,7 +13,7 @@ export class FiberNode {
 
 	return: FiberNode | null;
 	sibling: FiberNode | null;
-	child: FiberNode | null;
+	child: FiberNode | null; // TODO: 没有考虑数组？
 	index: number;
 
 	pendingProps: Props;
@@ -27,11 +27,12 @@ export class FiberNode {
 	updateQueue: unknown;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
+		// 实例属性
 		this.tag = tag;
 		this.key = key;
-		// HostComponent <div></div> div DOM
+		/** HostComponent <div></div> div DOM */
 		this.stateNode = null;
-		// FiberNode 类型 FunctionComponent () => {}
+		/** FiberNode 类型 FunctionComponent () => {} */
 		this.type = null;
 
 		// 构成树状结构
@@ -43,18 +44,22 @@ export class FiberNode {
 		this.ref = null;
 
 		// 作为工作单元
+		/** 刚开始准备工作时的属性 */
 		this.pendingProps = pendingProps;
+		/** 工作完之后的 props */
 		this.memoizedProps = null;
 		this.memoizedState = null;
 		this.updateQueue = null;
 
+		/** 指向另一棵树对应的 FiberNode，current / wip 但是如果没有呢？ */
 		this.alternate = null;
-		// 副作用
+		// 副作用，宿主环境要执行的 API
 		this.flags = NoFlags;
 		this.subtreeFlags = NoFlags;
 	}
 }
 
+/** 根节点 */
 export class FiberRootNode {
 	container: Container;
 	current: FiberNode;
@@ -81,7 +86,7 @@ export const createWorkInProgress = (
 		wip.alternate = current;
 		current.alternate = wip;
 	} else {
-		// update
+		// update，传入这次的props，清除掉上次的更新标志
 		wip.pendingProps = pendingProps;
 		wip.flags = NoFlags;
 	}
@@ -98,10 +103,11 @@ export function createFiberFromElement(element: ReactElementType) {
 	const { type, key, props } = element;
 	let fiberTag: WorkTag = FunctionComponent;
 
+	// div 的 type 为 'div'
 	if (typeof type === 'string') {
 		fiberTag = HostComponent;
 	} else if (typeof type !== 'function' && __DEV__) {
-		console.warn('为定义的type类型', element);
+		console.warn('未定义的type类型', element);
 	}
 	const fiber = new FiberNode(fiberTag, props, key);
 	fiber.type = type;

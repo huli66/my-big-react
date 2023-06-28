@@ -14,9 +14,11 @@ function prepareFreshStack(root: FiberRootNode) {
 export function scheduleUpdateOnFiber(fiber: FiberNode) {
 	// TODO: 调度功能
 	const root = markUpdateFromFiberToRoot(fiber);
+	console.log('schedule update');
 	renderRoot(root);
 }
 
+/** 找到挂载节点的 FiberNode，即 hostRootFiber 其stateNode 指向 fiberRootNode */
 function markUpdateFromFiberToRoot(fiber: FiberNode) {
 	let node = fiber;
 	let parent = node.return;
@@ -36,6 +38,7 @@ function renderRoot(root: FiberRootNode) {
 	// 初始化
 	prepareFreshStack(root);
 
+	// 维持出现改动就diff
 	do {
 		try {
 			workLoop();
@@ -49,6 +52,7 @@ function renderRoot(root: FiberRootNode) {
 		}
 	} while (true);
 
+	// TODO: 这里应该有问题，对比之后提交，应该是放在 workLoop 中
 	const finishedWork = root.current.alternate;
 	root.finishedWork = finishedWork;
 
@@ -90,6 +94,7 @@ function commitRoot(root: FiberRootNode) {
 }
 
 function workLoop() {
+	console.log('workLoop start');
 	while (workInprogress !== null) {
 		performUnitOfWork(workInprogress);
 	}
@@ -102,15 +107,20 @@ function performUnitOfWork(fiber: FiberNode) {
 	if (next === null) {
 		completeUnitOfWork(fiber);
 	} else {
-		workInprogress = null;
+		workInprogress = next;
 	}
 }
 
 function completeUnitOfWork(fiber: FiberNode) {
 	let node: FiberNode | null = fiber;
 
+	// 用循环是为了返回到父节点后
 	do {
 		completeWork(node);
+		// 执行完当前 FiberNode 的 completeWork 后
+		// 如果有兄弟节点则进入兄弟节点，退出 completeUnitWork，进入兄弟节点的 beginWork
+		// 没有则返回父节点，执行父节点的 completeWork
+		// 循环到最后则是根节点的 fiber.return 为 null 被赋值给 wip，此时 跳出循环，workLoop
 		const sibling = node.sibling;
 
 		if (sibling !== null) {
