@@ -1,7 +1,6 @@
 // 宿主环境方法和属性
 
 export type Container = Element;
-
 export type Instance = Element;
 
 export const createInstance = (type: string, props?: any): Instance => {

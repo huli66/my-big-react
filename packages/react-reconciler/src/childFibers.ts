@@ -58,7 +58,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 
 		// HostText
 		if (typeof newChild === 'string' || typeof newChild === 'number') {
-			placeSingleChild(
+			return placeSingleChild(
 				reconcileSingleTextNode(returnFiber, currentFiber, newChild)
 			);
 		}

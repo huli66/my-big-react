@@ -2,7 +2,6 @@ import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
 import { FunctionComponent, HostComponent, WorkTag } from './workTags';
 import { Flag, NoFlags } from './fiberFlags';
 import { Container } from 'hostConfig';
-import { UpdateQueue } from './updateQueue';
 
 export class FiberNode {
 	type: any;
@@ -89,6 +88,7 @@ export const createWorkInProgress = (
 		// update，传入这次的props，清除掉上次的更新标志
 		wip.pendingProps = pendingProps;
 		wip.flags = NoFlags;
+		wip.subtreeFlags = NoFlags;
 	}
 	wip.type = current.type;
 	wip.updateQueue = current.updateQueue;
