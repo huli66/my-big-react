@@ -1,25 +1,14 @@
 import React from 'react';
+import { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 
-// const jsx = (
-// 	<div>
-// 		<span>World</span>
-// 	</div>
-// );
-
-// console.log(React);
-// console.log(ReactDOM);
-// console.log(jsx);
-
-// const root = document.querySelector('#root');
-// ReactDOM.createRoot(root).render(jsx);
+console.log(import.meta.hot);
+console.log(import.meta);
 
 function App() {
-	return (
-		<div>
-			<Child />
-		</div>
-	);
+	const [num, setNum] = useState(100);
+	window.setNum = setNum;
+	return <div>{num}</div>;
 }
 
 function Child() {

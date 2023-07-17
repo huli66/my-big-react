@@ -5,7 +5,7 @@ import currentDispatcher, {
 import { jsxDEV } from './src/jsx';
 // React
 
-const useState: Dispatcher['useState'] = (initialState: any) => {
+export const useState: Dispatcher['useState'] = (initialState: any) => {
 	const dispatcher = resolveDispatcher();
 	return dispatcher.useState(initialState);
 };
