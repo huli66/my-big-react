@@ -45,6 +45,7 @@ export const completeWork = (wip: FiberNode) => {
 			bubbleProperties(wip);
 			return null;
 		case HostRoot:
+			bubbleProperties(wip);
 			return null;
 		case FunctionComponent:
 			bubbleProperties(wip);

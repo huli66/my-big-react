@@ -11,7 +11,6 @@ import { mountChildFibers, reconcileChildFibers } from './childFibers';
 import { renderWithHooks } from './fiberHooks';
 
 export const beginWork = (wip: FiberNode) => {
-	console.log('beginWork', wip);
 	// 比较，返回子 FiberNode
 	switch (wip.tag) {
 		case HostRoot:
