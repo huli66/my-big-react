@@ -27,6 +27,14 @@ const ReactElement = function (
 	return element;
 };
 
+export function isValidElement(object: any) {
+	return (
+		typeof object === 'object' &&
+		object !== null &&
+		object.$$typeof === REACT_ELEMENT_TYPE
+	);
+}
+
 // React 17 之前 JSX 代码转化结果是 React.createElement 的调用, 17 之后是 jsx 方法的调用
 export const jsx = (type: ElementType, config: any, ...maybeChildren: any) => {
 	let key: Key = null;
