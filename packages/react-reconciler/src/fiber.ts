@@ -24,6 +24,7 @@ export class FiberNode {
 	subtreeFlags: Flag;
 
 	updateQueue: unknown;
+	deletions: FiberNode[] | null;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		// 实例属性
@@ -47,8 +48,11 @@ export class FiberNode {
 		this.pendingProps = pendingProps;
 		/** 工作完之后的 props */
 		this.memoizedProps = null;
+		/** 存放链表 */
 		this.memoizedState = null;
 		this.updateQueue = null;
+
+		this.deletions = null;
 
 		/** 指向另一棵树对应的 FiberNode，current / wip 但是如果没有呢？ */
 		this.alternate = null;
@@ -89,6 +93,7 @@ export const createWorkInProgress = (
 		wip.pendingProps = pendingProps;
 		wip.flags = NoFlags;
 		wip.subtreeFlags = NoFlags;
+		wip.deletions = null;
 	}
 	wip.type = current.type;
 	wip.updateQueue = current.updateQueue;
