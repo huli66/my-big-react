@@ -1,7 +1,9 @@
 import {
 	Container,
+	Instance,
 	appendChildToContainer,
 	commitUpdate,
+	insertChildToContainer,
 	removeChild
 } from 'hostConfig';
 import { FiberNode, FiberRootNode } from './fiber';
@@ -155,11 +157,53 @@ const commitPlacement = (finishedWork: FiberNode) => {
 	}
 	// 找到父级节点
 	const hostParent = getHostParent(finishedWork);
+
+	// host sibling
+	const sibling = getHostSibling(finishedWork);
+
 	// 插入到父级节点
 	if (hostParent !== null) {
-		appendPlacementNodeIntoContainer(finishedWork, hostParent);
+		insertOrAppendPlacementNodeIntoContainer(finishedWork, hostParent, sibling);
 	}
 };
+
+function getHostSibling(fiber: FiberNode) {
+	let node: FiberNode = fiber;
+
+	findSibling: while (true) {
+		// 向上遍历
+		while (node.tag !== HostText && node.tag !== HostComponent) {
+			while (node.sibling === null) {
+				const parent = node.return;
+
+				if (
+					parent === null ||
+					parent.tag === HostComponent ||
+					parent.tag === HostRoot
+				) {
+					return;
+				}
+				node = parent;
+			}
+			node.sibling.return = node.return;
+			node = node.sibling;
+			// 向下遍历
+			if ((node.flags & Placement) !== NoFlags) {
+				continue findSibling;
+			}
+			if (node.child === null) {
+				continue findSibling;
+			} else {
+				node.child.return = node;
+				node = node.child;
+			}
+		}
+
+		if ((node.flags & Placement) === NoFlags) {
+			return node.stateNode;
+		}
+	}
+}
 
 function getHostParent(fiber: FiberNode): Container | null {
 	let parent = fiber.return;
@@ -186,24 +230,29 @@ function getHostParent(fiber: FiberNode): Container | null {
  * @param hostParent 父级节点，比如 div
  * @returns
  */
-function appendPlacementNodeIntoContainer(
+function insertOrAppendPlacementNodeIntoContainer(
 	finishedWork: FiberNode,
-	hostParent: Container
+	hostParent: Container,
+	before?: Instance
 ) {
 	// 找到第一层 HostComponent(宿主环境的组件，比如 div，而不是React组件APP) 或者 HostText(字符串或者数字)
 	if (finishedWork.tag === HostComponent || finishedWork.tag === HostText) {
-		appendChildToContainer(hostParent, finishedWork.stateNode);
+		if (before) {
+			insertChildToContainer(finishedWork.stateNode, hostParent, before);
+		} else {
+			appendChildToContainer(hostParent, finishedWork.stateNode);
+		}
 		return;
 	}
 	const child = finishedWork.child;
 	if (child !== null) {
-		appendPlacementNodeIntoContainer(child, hostParent);
+		insertOrAppendPlacementNodeIntoContainer(child, hostParent);
 		let sibling = child.sibling;
 
 		while (sibling !== null) {
 			// 是否有可能把下一个循环的dom也插入进去了
 			// 不会，因为到这一步至少已经往下一个层级了，上一个层级如果是宿主环境dom，那早就插进去了
-			appendPlacementNodeIntoContainer(sibling, hostParent);
+			insertOrAppendPlacementNodeIntoContainer(sibling, hostParent);
 			sibling = sibling.sibling;
 		}
 	}
