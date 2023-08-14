@@ -46,6 +46,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 		element: ReactElementType
 	) {
 		const key = element.key;
+		// 遍历更新前的所有兄弟节点
 		while (currentFiber !== null) {
 			// update
 			if (currentFiber.key === key) {
@@ -74,6 +75,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 				currentFiber = currentFiber.sibling;
 			}
 		}
+		// 没有能复用的，创建新的 fiber
 		const fiber = createFiberFromElement(element);
 		fiber.return = returnFiber;
 		return fiber;

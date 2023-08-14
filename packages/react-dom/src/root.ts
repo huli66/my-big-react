@@ -11,7 +11,7 @@ export function createRoot(container: Container) {
 
 	return {
 		render(element: ReactElementType) {
-			initEvent(container, 'click');
+			initEvent(container, 'click'); // 挂载所有可执行事件
 			return updateContainer(element, root);
 		}
 	};
