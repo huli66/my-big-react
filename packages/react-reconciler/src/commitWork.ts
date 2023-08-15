@@ -81,24 +81,41 @@ const commitMutationEffectsOnFiber = (finishedWork: FiberNode) => {
 	}
 };
 
+function recordHostChildrenToDelete(
+	childrenToDelete: FiberNode[],
+	unmountFiber: FiberNode
+) {
+	// 1.找到第一个 root host 节点
+	let lastOne = childrenToDelete[childrenToDelete.length - 1];
+
+	if (!lastOne) {
+		childrenToDelete.push(unmountFiber);
+	} else {
+		// 2.每找到一个 host 节点，判断是不是上一步的节点的兄弟节点
+		let node = lastOne.sibling;
+		while (node !== null) {
+			if (unmountFiber === node) {
+				childrenToDelete.push(unmountFiber);
+			}
+			node = node.sibling;
+		}
+	}
+}
+
 function commitDeletion(childToDelete: FiberNode) {
 	// 对不同子树处理，找到最近的 根
-	let rootHostNode: FiberNode | null = null;
+	const rootChildrenToDelete: FiberNode[] = [];
 
 	// 递归子树
 	commitNestedComponent(childToDelete, (unmountFiber) => {
 		switch (unmountFiber.tag) {
 			case HostComponent:
-				if (rootHostNode === null) {
-					rootHostNode = unmountFiber;
-				}
+				recordHostChildrenToDelete(rootChildrenToDelete, unmountFiber);
 				// TODO: 解绑 ref
 				return;
 
 			case HostText:
-				if (rootHostNode === null) {
-					rootHostNode = unmountFiber;
-				}
+				recordHostChildrenToDelete(rootChildrenToDelete, unmountFiber);
 				return;
 
 			case FunctionComponent:
@@ -106,16 +123,18 @@ function commitDeletion(childToDelete: FiberNode) {
 				return;
 			default:
 				if (__DEV__) {
-					console.warn('未处理的unmount类型', rootHostNode);
+					console.warn('未处理的unmount类型', unmountFiber);
 				}
 				return;
 		}
 	});
 	// 移除rootHostNode的DOM
-	if (rootHostNode !== null) {
+	if (rootChildrenToDelete.length) {
 		const hostParent = getHostParent(childToDelete);
 		if (hostParent !== null) {
-			removeChild((rootHostNode as FiberNode).stateNode, hostParent);
+			rootChildrenToDelete.forEach((node) => {
+				removeChild(node.stateNode, hostParent);
+			});
 		}
 	}
 	childToDelete.return = null;
@@ -189,6 +208,7 @@ function getHostSibling(fiber: FiberNode) {
 			node = node.sibling;
 			// 向下遍历
 			if ((node.flags & Placement) !== NoFlags) {
+				// 不能是不稳定节点（比如带有 Placement 也要移走的节点）
 				continue findSibling;
 			}
 			if (node.child === null) {
