@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 
-console.log(import.meta.hot);
+// console.log(import.meta.hot);
 console.log(import.meta);
 
 function App() {
@@ -17,13 +17,14 @@ function App() {
 
 	// 测试 fragment
 	return (
-		<ul onClickCapture={() => setNum(num + 1)}>
-			<>
-				<li>4</li>
-				<li>5</li>
-			</>
-			<li>6</li>
-			{arr}
+		<ul
+			onClickCapture={() => {
+				setNum((num) => num + 1);
+				setNum((num) => num + 1);
+				setNum((num) => num + 2);
+			}}
+		>
+			{num}
 		</ul>
 	);
 }
