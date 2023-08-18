@@ -12,7 +12,9 @@ import { Action } from 'shared/ReactTypes';
 import { scheduleUpdateOnFiber } from './wokrLoop';
 import { Lane, NoLane, requestUpdateLane } from './fiberLanes';
 
+/** 当前正在处理的 fibernode */
 let currentlyRenderingFiber: FiberNode | null = null;
+/** 当前正在处理的 hook */
 let workInProgressHook: Hook | null = null;
 let currentHook: Hook | null = null;
 let renderLane: Lane = NoLane;
@@ -20,11 +22,15 @@ let renderLane: Lane = NoLane;
 const { currentDispatcher } = internals;
 
 interface Hook {
+	/** hook 自身数据 */
 	memoizedState: any;
 	updateQueue: unknown;
+	/** 下一个 hook */
 	next: Hook | null;
 }
-
+/**
+ * 获取函数组件要渲染的内容
+ */
 export function renderWithHooks(wip: FiberNode, lane: Lane) {
 	// 赋值操作
 	currentlyRenderingFiber = wip;
@@ -42,9 +48,9 @@ export function renderWithHooks(wip: FiberNode, lane: Lane) {
 		currentDispatcher.current = HookDispatcherOnMount;
 	}
 
-	const Component = wip.type;
+	const Component = wip.type; // type 保存函数组件的名字
 	const props = wip.pendingProps;
-	const children = Component(props);
+	const children = Component(props); // 传入属性调用，返回值就是 DOM
 
 	// 重置操作
 	currentlyRenderingFiber = null;
@@ -142,12 +148,14 @@ function mountState<State>(
 	hook.updateQueue = queue;
 	hook.memoizedState = memoizedState;
 
+	// 用 bind 的原因是，这样这个 dispatch 方法可以脱离组件，暴露到其他地方使用
 	// @ts-ignore
 	const dispatch = dispatchSetState.bind(null, currentlyRenderingFiber, queue);
 	queue.dispatch = dispatch;
 	return [memoizedState, dispatch];
 }
 
+/** 实质上是创建 update 放入 updateQueue 触发更新 */
 function dispatchSetState<State>(
 	fiber: FiberNode,
 	updateQueue: UpdateQueue<State>,
@@ -172,6 +180,7 @@ function mountWorkInProgressHook(): Hook {
 			throw new Error('请在函数组件内调用 hook');
 		} else {
 			workInProgressHook = hook;
+			// hook 链表保存在 fibernode 的 memoizedState
 			currentlyRenderingFiber.memoizedState = workInProgressHook;
 		}
 	} else {

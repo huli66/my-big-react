@@ -22,6 +22,11 @@ function App() {
 				setNum((num) => num + 1);
 				setNum((num) => num + 1);
 				setNum((num) => num + 2);
+				console.log(num);
+				Promise.resolve(null).then(() => {
+					console.log('微任务', num);
+				});
+				setTimeout(() => console.log('宏任务', num), 10);
 			}}
 		>
 			{num}
